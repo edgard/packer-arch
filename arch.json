@@ -1,0 +1,147 @@
+{
+  "variables": {
+    "iso_url": "https://mirrors.kernel.org/archlinux/iso/2019.06.01/archlinux-2019.06.01-x86_64.iso",
+    "iso_checksum_url": "https://mirrors.kernel.org/archlinux/iso/2019.06.01/sha1sums.txt",
+    "iso_checksum_type": "sha1",
+    "config_user": "edgard",
+    "config_zoneinfo": "Europe/Warsaw",
+    "config_country": "PL"
+  },
+  "builders": [
+    {
+      "type": "virtualbox-iso",
+      "iso_url": "{{ user `iso_url` }}",
+      "iso_checksum_url": "{{ user `iso_checksum_url` }}",
+      "iso_checksum_type": "{{ user `iso_checksum_type` }}",
+      "boot_wait": "5s",
+      "boot_command": [
+        "<enter><wait30>",
+        "echo root:packer | chpasswd<enter>",
+        "systemctl start sshd<enter>"
+      ],
+      "disk_size": 32768,
+      "memory": 1024,
+      "ssh_username": "root",
+      "ssh_password": "packer",
+      "ssh_timeout": "20m",
+      "shutdown_command": "shutdown -P now",
+      "post_shutdown_delay": "30s",
+      "headless": "true",
+      "keep_registered": "false",
+      "guest_os_type": "ArchLinux_64",
+      "guest_additions_mode": "disable",
+      "hard_drive_interface": "sata",
+      "format": "ova",
+      "vboxmanage_post": [
+        [
+          "modifyvm",
+          "{{.Name}}",
+          "--memory",
+          "4096"
+        ],
+        [
+          "modifyvm",
+          "{{.Name}}",
+          "--cpus",
+          "2"
+        ],
+        [
+          "modifyvm",
+          "{{.Name}}",
+          "--vram",
+          "16"
+        ],
+        [
+          "modifyvm",
+          "{{.Name}}",
+          "--ioapic",
+          "on"
+        ],
+        [
+          "modifyvm",
+          "{{.Name}}",
+          "--pae",
+          "on"
+        ],
+        [
+          "modifyvm",
+          "{{.Name}}",
+          "--rtcuseutc",
+          "on"
+        ],
+        [
+          "modifyvm",
+          "{{.Name}}",
+          "--accelerate3d",
+          "off"
+        ],
+        [
+          "modifyvm",
+          "{{.Name}}",
+          "--accelerate2dvideo",
+          "off"
+        ],
+        [
+          "modifyvm",
+          "{{.Name}}",
+          "--vrde",
+          "off",
+          "--vrdeport",
+          "default",
+          "--vrdeaddress",
+          ""
+        ],
+        [
+          "modifyvm",
+          "{{.Name}}",
+          "--nictype1",
+          "82540EM"
+        ],
+        [
+          "modifyvm",
+          "{{.Name}}",
+          "--nictype2",
+          "82540EM"
+        ],
+        [
+          "modifyvm",
+          "{{.Name}}",
+          "--nic1",
+          "nat"
+        ],
+        [
+          "modifyvm",
+          "{{.Name}}",
+          "--nic2",
+          "hostonly"
+        ],
+        [
+          "storagectl",
+          "{{.Name}}",
+          "--name",
+          "IDE Controller",
+          "--remove"
+        ]
+      ]
+    }
+  ],
+  "provisioners": [
+    {
+      "type": "shell",
+      "script": "scripts/install.sh",
+      "environment_vars": [
+        "CONFIG_USER={{ user `config_user` }}",
+        "CONFIG_ZONEINFO={{ user `config_zoneinfo` }}",
+        "CONFIG_COUNTRY={{ user `config_country` }}"
+      ]
+    },
+    {
+      "type": "shell",
+      "script": "scripts/cleanup.sh"
+    },
+    {
+      "type": "shell",
+      "script": "scripts/finish.sh"
+    }
+  ]
+}
