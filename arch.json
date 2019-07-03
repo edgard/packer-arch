@@ -49,7 +49,7 @@
           "modifyvm",
           "{{.Name}}",
           "--vram",
-          "16"
+          "128"
         ],
         [
           "modifyvm",
@@ -72,14 +72,32 @@
         [
           "modifyvm",
           "{{.Name}}",
+          "--graphicscontroller",
+          "vmsvga"
+        ],
+        [
+          "modifyvm",
+          "{{.Name}}",
           "--accelerate3d",
-          "off"
+          "on"
         ],
         [
           "modifyvm",
           "{{.Name}}",
           "--accelerate2dvideo",
           "off"
+        ],
+        [
+          "modifyvm",
+          "{{.Name}}",
+          "--clipboard",
+          "bidirectional"
+        ],
+        [
+          "modifyvm",
+          "{{.Name}}",
+          "--draganddrop",
+          "bidirectional"
         ],
         [
           "modifyvm",
