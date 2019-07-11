@@ -5,7 +5,10 @@
     "iso_checksum_type": "sha1",
     "config_user": "edgard",
     "config_zoneinfo": "Europe/Warsaw",
-    "config_country": "PL"
+    "config_country": "PL",
+    "config_disk_size": "32768",
+    "config_memory": "4096",
+    "config_cpus": "2"
   },
   "builders": [
     {
@@ -19,8 +22,9 @@
         "echo root:packer | chpasswd<enter>",
         "systemctl start sshd<enter>"
       ],
-      "disk_size": 32768,
-      "memory": 1024,
+      "disk_size": "{{ user `config_disk_size` }}",
+      "memory": "{{ user `config_memory` }}",
+      "cpus": "{{ user `config_cpus` }}",
       "ssh_username": "root",
       "ssh_password": "packer",
       "ssh_timeout": "20m",
@@ -31,77 +35,64 @@
       "guest_os_type": "ArchLinux_64",
       "guest_additions_mode": "disable",
       "hard_drive_interface": "sata",
-      "format": "ova",
       "vboxmanage_post": [
         [
           "modifyvm",
-          "{{.Name}}",
-          "--memory",
-          "4096"
-        ],
-        [
-          "modifyvm",
-          "{{.Name}}",
-          "--cpus",
-          "2"
-        ],
-        [
-          "modifyvm",
-          "{{.Name}}",
+          "{{ .Name }}",
           "--vram",
           "128"
         ],
         [
           "modifyvm",
-          "{{.Name}}",
+          "{{ .Name }}",
           "--ioapic",
           "on"
         ],
         [
           "modifyvm",
-          "{{.Name}}",
+          "{{ .Name }}",
           "--pae",
           "on"
         ],
         [
           "modifyvm",
-          "{{.Name}}",
+          "{{ .Name }}",
           "--rtcuseutc",
           "on"
         ],
         [
           "modifyvm",
-          "{{.Name}}",
+          "{{ .Name }}",
           "--graphicscontroller",
           "vmsvga"
         ],
         [
           "modifyvm",
-          "{{.Name}}",
+          "{{ .Name }}",
           "--accelerate3d",
-          "on"
+          "off"
         ],
         [
           "modifyvm",
-          "{{.Name}}",
+          "{{ .Name }}",
           "--accelerate2dvideo",
           "off"
         ],
         [
           "modifyvm",
-          "{{.Name}}",
+          "{{ .Name }}",
           "--clipboard",
           "bidirectional"
         ],
         [
           "modifyvm",
-          "{{.Name}}",
+          "{{ .Name }}",
           "--draganddrop",
           "bidirectional"
         ],
         [
           "modifyvm",
-          "{{.Name}}",
+          "{{ .Name }}",
           "--vrde",
           "off",
           "--vrdeport",
@@ -111,36 +102,48 @@
         ],
         [
           "modifyvm",
-          "{{.Name}}",
+          "{{ .Name }}",
           "--nictype1",
-          "82540EM"
+          "virtio"
         ],
         [
           "modifyvm",
-          "{{.Name}}",
-          "--nictype2",
-          "82540EM"
-        ],
-        [
-          "modifyvm",
-          "{{.Name}}",
+          "{{ .Name }}",
           "--nic1",
           "nat"
-        ],
-        [
-          "modifyvm",
-          "{{.Name}}",
-          "--nic2",
-          "hostonly"
-        ],
-        [
-          "storagectl",
-          "{{.Name}}",
-          "--name",
-          "IDE Controller",
-          "--remove"
         ]
       ]
+    },
+    {
+      "type": "vmware-iso",
+      "iso_url": "{{ user `iso_url` }}",
+      "iso_checksum_url": "{{ user `iso_checksum_url` }}",
+      "iso_checksum_type": "{{ user `iso_checksum_type` }}",
+      "boot_wait": "5s",
+      "boot_command": [
+        "<enter><wait30>",
+        "echo root:packer | chpasswd<enter>",
+        "systemctl start sshd<enter>"
+      ],
+      "disk_size": "{{ user `config_disk_size` }}",
+      "memory": "{{ user `config_memory` }}",
+      "cpus": "{{ user `config_cpus` }}",
+      "ssh_username": "root",
+      "ssh_password": "packer",
+      "ssh_timeout": "20m",
+      "shutdown_command": "shutdown -P now",
+      "headless": "true",
+      "keep_registered": "false",
+      "version": 16,
+      "guest_os_type": "other4xlinux-64",
+      "disk_adapter_type": "scsi",
+      "disk_type_id": 0,
+      "network_adapter_type": "vmxnet3",
+      "network": "nat",
+      "tools_upload_flavor": "",
+      "vmx_data": {
+        "tools.upgrade.policy": "manual"
+      }
     }
   ],
   "provisioners": [
@@ -154,12 +157,33 @@
       ]
     },
     {
+      "only": [
+        "virtualbox-iso"
+      ],
+      "type": "shell",
+      "script": "scripts/install-virtualbox.sh"
+    },
+    {
+      "only": [
+        "vmware-iso"
+      ],
+      "type": "shell",
+      "script": "scripts/install-vmware.sh"
+    },
+    {
       "type": "shell",
       "script": "scripts/cleanup.sh"
     },
     {
       "type": "shell",
       "script": "scripts/finish.sh"
+    }
+  ],
+  "post-processors": [
+    {
+      "type": "compress",
+      "keep_input_artifact": false,
+      "output": "Arch-Linux-x86_64-{{ split .BuilderType \"-\" 0 }}-{{ isotime \"20060102030405\" }}.tar.gz"
     }
   ]
 }
