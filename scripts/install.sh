@@ -23,11 +23,11 @@ sgdisk -n 1:0:0 -c 1:"root" -t 1:8300 ${CONFIG_DISK}
 sgdisk ${CONFIG_DISK} -A 1:set:2
 mkfs.ext4 -O ^64bit -F -m 0 -q ${CONFIG_DISK}1
 mount ${CONFIG_DISK}1 /mnt
-pacstrap /mnt base base-devel
+pacstrap /mnt base base-devel linux linux-firmware
 genfstab -U /mnt >>/mnt/etc/fstab
 
 cat <<EOF >/mnt/run.sh
-pacman -S --needed --noconfirm openssh syslinux gptfdisk
+pacman -S --needed --noconfirm dhcpcd openssh syslinux gptfdisk
 ln -sf /usr/share/zoneinfo/${CONFIG_ZONEINFO} /etc/localtime
 sed '/^#en_US\.UTF-8/ s/^#//' -i /etc/locale.gen
 locale-gen
