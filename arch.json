@@ -1,7 +1,7 @@
 {
   "variables": {
-    "iso_url": "https://mirrors.kernel.org/archlinux/iso/2020.02.01/archlinux-2020.02.01-x86_64.iso",
-    "iso_checksum_url": "https://mirrors.kernel.org/archlinux/iso/2020.02.01/sha1sums.txt",
+    "iso_url": "https://mirrors.kernel.org/archlinux/iso/2020.03.01/archlinux-2020.03.01-x86_64.iso",
+    "iso_checksum_url": "https://mirrors.kernel.org/archlinux/iso/2020.03.01/sha1sums.txt",
     "iso_checksum_type": "sha1",
     "config_user": "edgard",
     "config_zoneinfo": "Europe/Warsaw",
